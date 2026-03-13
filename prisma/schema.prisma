@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client"
+  provider        = "prisma-client-js"
   output          = "../app/generated/prisma"
   previewFeatures = ["driverAdapters"]
 }
@@ -64,6 +64,7 @@ model staff {
   Remarks      String?   @db.VarChar(255)
   Created      DateTime? @default(now()) @db.DateTime(0)
   Modified     DateTime? @default(now()) @db.DateTime(0)
+  profilePic   String?   @db.Text
   meetingmember meetingmember[]
   notification  notification[]
   actionitem    actionitem[]
@@ -76,6 +77,7 @@ model users {
   email    String? @unique(map: "email") @db.VarChar(100)
   password String? @db.VarChar(255)
   role     String  @db.VarChar(30)
+  profilePic String? @db.Text
 }
 
 model meetingminutes {

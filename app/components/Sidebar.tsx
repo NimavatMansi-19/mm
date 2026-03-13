@@ -15,18 +15,33 @@ import {
     Scale,
     UserCheck,
     BarChart3,
-    Command
+    Command,
+    User
 } from 'lucide-react';
 
 export default function Sidebar() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [role, setRole] = useState<string | null>(null);
+    const [userName, setUserName] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
     const pathname = usePathname();
 
     useEffect(() => {
         const token = getToken();
         setIsLoggedIn(!!token);
         setRole(getRoleFromToken());
+        
+        if (token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const payload = JSON.parse(atob(base64));
+                setUserName(payload.name);
+                setUserEmail(payload.email);
+            } catch (e) {
+                console.error("Error decoding token in sidebar", e);
+            }
+        }
     }, [pathname]);
 
     if (!isLoggedIn || pathname === '/' || pathname === '/login') return null;
@@ -47,6 +62,7 @@ export default function Sidebar() {
         { href: "/decisions", label: "Decision Register", icon: Scale, show: true },
         { href: "/meetingmember", label: "Attendance", icon: UserCheck, show: role === 'admin' || role === 'meeting_convener' },
         { href: "/reports/attendance", label: "Reports", icon: BarChart3, show: role === 'admin' || role === 'meeting_convener' },
+        { href: "/profile", label: "My Profile", icon: User, show: true },
     ];
 
     return (
@@ -83,10 +99,15 @@ export default function Sidebar() {
             </div>
 
             <div className="p-4 border-t border-slate-100">
-                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                    <p className="text-xs font-bold text-slate-500 mb-1 tracking-wide">Enterprise Edition</p>
-                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Secured and encrypted environment.</p>
-                </div>
+                <Link href="/profile" className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors group">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold group-hover:bg-indigo-600 group-hover:text-white transition-colors uppercase">
+                        {userName?.charAt(0) || <User size={20} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-gray-900 truncate">{userName || "User Account"}</p>
+                        <p className="text-[10px] font-medium text-slate-500 truncate lowercase">{userEmail || role?.replace('_', ' ')}</p>
+                    </div>
+                </Link>
             </div>
         </aside>
     );

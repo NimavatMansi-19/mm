@@ -1,5 +1,5 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "../app/generated/prisma/client";
+import { PrismaClient } from "../app/generated/prisma";
 
 
 const prismaClientSingleton = () => {
@@ -9,7 +9,7 @@ const prismaClientSingleton = () => {
         user: process.env.DB_USER || "missing",
         port: process.env.DB_PORT || "missing"
     });
-    
+
     try {
         const adapter = new PrismaMariaDb({
             host: process.env.DB_HOST,
@@ -20,13 +20,13 @@ const prismaClientSingleton = () => {
             connectionLimit: 10, // Lowering limit for serverless/local dev stability
             connectTimeout: 5000,
         });
-        return new PrismaClient({ 
+        return new PrismaClient({
             adapter,
             log: ['error', 'warn']
         });
     } catch (error) {
         console.error("Prisma initialization failed:", error);
-        return new PrismaClient({}); // Fallback to standard client config
+        return new PrismaClient(); // Fallback to standard client config
     }
 };
 
